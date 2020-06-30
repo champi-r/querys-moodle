@@ -1,0 +1,25 @@
+SELECT 
+u.firstname as nombre,
+u.lastname as apellido,
+u.username as usuario,
+u.email as correo,
+IF (u.lastaccess = 0,'nunca',
+DATE_FORMAT(FROM_UNIXTIME(u.lastaccess),'%Y-%m-%d')) AS 'Ultimo acceso al sitio',
+co.shortname as 'Nombre corto del curso',
+co.fullname as 'Nombre completo del curso',
+IF (ul.timeaccess is NULL, 'nunca',
+DATE_FORMAT(FROM_UNIXTIME(ul.timeaccess),'%Y-%m-%d')) AS 'Ultimo acceso al curso'
+
+
+FROM prefix_role_assignments ra
+JOIN prefix_context con ON con.id=ra.contextid
+JOIN prefix_course AS co ON co.id=con.instanceid
+JOIN prefix_user AS u ON u.id=ra.userid
+LEFT JOIN prefix_user_lastaccess AS ul ON ul.userid=u.id AND ul.courseid=co.id
+
+WHERE 
+con.contextlevel=50
+AND ra.roleid=5
+AND ul.timeaccess IS NULL
+
+%%FILTER_SEARCHTEXT:co.shortname:~%%
