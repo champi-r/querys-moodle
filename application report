@@ -1,0 +1,45 @@
+SELECT 
+pud.name as Nombre, 
+pud.lastname as Apellido, 
+(CASE 
+     WHEN pud.document_type = 1 THEN 'DNI'
+     WHEN pud.document_type = 2 THEN 'PASAPORTE'
+     WHEN pud.document_type = 3 THEN 'OTRO'
+   END
+) as "Tipo de documento",
+pud.document_number as Documento, 
+pud.cuil as CUIL, 
+p.nombre as Jurisdiccion, 
+pud.email as Correo, 
+pud.celph as Telefono, 
+(CASE 
+     WHEN pud.education_level = 1 THEN 'Primario incompleto'
+     WHEN pud.education_level = 2 THEN 'Primario completo'
+     WHEN pud.education_level = 3 THEN 'Secundario incompleto'
+     WHEN pud.education_level = 4 THEN 'Secundario completo'
+     WHEN pud.education_level = 5 THEN 'Superior No Universitario Incompleto (Nivel Técnico)'
+     WHEN pud.education_level = 6 THEN 'Superior No Universitario Completo (Nivel Técnico)'
+     WHEN pud.education_level = 7 THEN 'Universitario Incompleto'
+     WHEN pud.education_level = 8 THEN 'Universitario Completo'
+     WHEN pud.education_level = 9 THEN 'Posgrado Incompleto'
+     WHEN pud.education_level = 10 THEN 'Posgrado Completo'
+   END
+) as Nivel_de_educacion, 
+DATE_FORMAT(FROM_UNIXTIME(pud.timemodified),'%d-%m-%Y') as Fecha, 
+pud.cargoactual as Cargo_Actual, 
+pp.name as Profesion, 
+(CASE
+            WHEN pud.status = 1 THEN 'Sin accion'
+            WHEN pud.status = 2 THEN 'Aceptado'
+            WHEN pud.status = -1 THEN 'Rechazado'
+END
+) as Estado
+
+
+FROM prefix_sumar_preseleccion pud
+LEFT join prefix_presumar_provincia AS p ON pud.jurisdiccion = p.id
+LEFT join prefix_presumar_profesiones AS pp ON pud.profesion = pp.id
+LEFT JOIN prefix_presumar_efectores AS pe ON pud.establecimiento = pe.cuie
+
+WHERE pud.courseid= %%COURSEID%%
+ORDER BY pud.name
